@@ -81,7 +81,7 @@ The working implementation proves you can execute. The presentation proves you c
 
 **30 minutes to present, 15 minutes live discussion. The session is 45 minutes total.**
 
-The build is table stakes, but the real signal is in how you explain what you're proposing and how you handle questions you didn't prepare for. Expect the discussion portion to include scenario-based questions about operational realities -- token expiry, rerun behavior, scope management, customer coordination -- not just clarifications on your slides.
+The build is table stakes, but the real signal is in how you explain what you're proposing and how you handle questions you didn't prepare for. Expect the discussion portion to include scenario-based questions about operational realities -- token expiry, rerun behavior, scope management, customer coordination -- not just clarifications on your slides. We are not expecting you to debug the workflow live during the call; we are evaluating how well you explain the debugging and decisions that already happened during the build.
 
 Assume your audience is made up of engineers and platform practitioners who work in these systems every day. Do not spend time narrating every low-level implementation detail. Focus on what the automation enables, what changes operationally for the team, what still requires human coordination, and why the pattern matters.
 
@@ -89,7 +89,7 @@ Assume your audience is made up of engineers and platform practitioners who work
 
 1. **Problem and Value:** The current discovery/integration friction, the manual steps eliminated, and the estimated engineering time saved per execution. Focus on the operational value unlocked by the automation rather than deep financial ROI math. State your assumptions clearly.
 
-2. **Solution Demo:** Run the workflow live for your onboarded service. Show the workspace structure, collections, spec in Spec Hub, environments, and monitors.
+2. **Solution Demo:** Demo the workflow live for your onboarded service using the working implementation you already built. You may run or rerun it if that helps your presentation, but the expectation is a working demo -- not live debugging. Show the workspace structure, collections, spec in Spec Hub, environments, and monitors.
 
 3. **Adaptation and Scaling:** This is the consulting piece. The customer's environment isn't uniform. Explain:
    - What in the onboarding workflow stays the same across services and what changes in the inputs, environment configuration, and platform-team coordination required for a service with different infrastructure or CI/CD
@@ -98,7 +98,7 @@ Assume your audience is made up of engineers and platform practitioners who work
 
 4. **Handoff and Ownership:** What artifacts do you leave behind? What does the platform team need to maintain this independently? What would require ongoing CSE support vs what's self-serve after Day 90? What would a working session with their team look like?
 
-**Discussion (15 min).** We'll ask scenario-based questions that test your operational awareness and consulting instinct. These may cover topics like what happens on Day 2 when the happy-path demo is over, how you handle requests that push beyond the engagement scope, or how you'd debug a workflow that's silently degrading. Come prepared to think on your feet.
+**Discussion (15 min).** We'll ask scenario-based questions that test your operational awareness and consulting instinct. These may cover topics like what happens on Day 2 when the happy-path demo is over, how you handle requests that push beyond the engagement scope, or how you would reason about a workflow that's silently degrading based on what you already built and learned. Come prepared to think on your feet.
 
 ## Evaluation Criteria
 
@@ -180,7 +180,7 @@ These are production actions maintained by the CSE team. You may call them direc
 
 **Time Guidance:**
 
-- Phase 1 (review specs, build workflow, onboard first spec): ~30-45 minutes with AI assistance -- the starter material may not work as-is. Debugging is part of the exercise. Take time to understand what you're onboarding before automating it, and what you're debugging before fixing it. If you're spending more than an hour here, step back and reassess your approach.
+- Phase 1 (review specs, build workflow, onboard first spec): ~30-45 minutes with AI assistance -- the starter material may not work as-is. Debugging is part of the build portion of the exercise. Take time to understand what you're onboarding before automating it, and what you're debugging before fixing it. If you're spending more than an hour here, step back and reassess your approach.
 - Phase 2 (adaptation analysis + presentation + scenario prep): ~1.5 hours -- this is where the real evaluation weight lives. Invest here. Your ability to explain what you built, why it works, what breaks, and how you'd adapt it matters more than the build itself.
 - Practice/refinement: ~0.5 hours
 
@@ -196,5 +196,5 @@ We want to see that you can take existing tooling, make it work in a realistic s
 - Your scaling plan distinguishes between what becomes repeatable per service and what still depends on customer/platform coordination
 - You clearly communicate the practical value of the pattern to an engineering/platform audience, with lightweight assumptions where helpful, and explain why it matters beyond a one-time demo
 - Your handoff plan addresses the platform/ops team specifically -- what do they need to maintain this without CSE involvement?
-- You can think on your feet when asked about failure modes, operational edge cases, and scope management -- not just recite your slides
+- You can think on your feet when asked about failure modes, operational edge cases, and scope management -- not just recite your slides or treat the discussion like a scripted status update
 - You're honest about what AI generated vs what you wrote, validated, or changed yourself
