@@ -1,5 +1,4 @@
 .DS_Store
 
 # Internal evaluator documents -- do not expose to candidates
-SCORING_RUBRIC.md
-EVALUATOR_GUIDE.md
+.internal/

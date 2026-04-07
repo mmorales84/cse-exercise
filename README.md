@@ -57,7 +57,7 @@ You're provided with:
 
 1. **Build a working workflow** for a first service of your choice
    - Choose one of the provided specs, wire together a GitHub Actions workflow, and get it running end-to-end against a real Postman workspace you control
-   - You may adapt the included starter asset or wire the immutable upstream actions directly
+   - You may use the included starter asset, modify it, or bypass it and wire the immutable upstream actions directly
    - The result should be: workspace created, spec uploaded to Spec Hub, collections generated (baseline, smoke, contract), environments configured, collections exported to your repo
 
 2. **Adaptation Analysis for a second spec** that has meaningfully different characteristics from the first
@@ -67,6 +67,7 @@ You're provided with:
 3. **README with:**
    - How you built the workflow and what decisions you made
    - What's universal in the onboarding pattern vs what changes per service
+   - What the generated checks can infer from the spec alone vs what still requires service-specific knowledge, and why that distinction matters operationally
    - What the customer's ops/platform team would need to configure on their side (things you can't do without their AWS account, GitLab access, etc.)
    - Run instructions, validation notes, and trade-offs
 
@@ -81,7 +82,7 @@ The working implementation proves you can execute. The presentation proves you c
 
 **30 minutes to present, 15 minutes live discussion. The session is 45 minutes total.**
 
-The build is table stakes, but the real signal is in how you explain what you're proposing and how you handle questions you didn't prepare for. Expect the discussion portion to include scenario-based questions about operational realities -- token expiry, rerun behavior, scope management, customer coordination -- not just clarifications on your slides. We are not expecting you to debug the workflow live during the call; we are evaluating how well you explain the debugging and decisions that already happened during the build.
+The build is table stakes, but the real signal is in how you explain what you're proposing and how you handle questions you didn't prepare for. Expect the discussion portion to include scenario-based questions about what changes operationally once the first happy-path run is over -- not just clarifications on your slides. We are not expecting you to debug the workflow live during the call; we are evaluating how well you explain the debugging and decisions that already happened during the build.
 
 Assume your audience is made up of engineers and platform practitioners who work in these systems every day. Do not spend time narrating every low-level implementation detail. Focus on what the automation enables, what changes operationally for the team, what still requires human coordination, and why the pattern matters.
 
@@ -89,7 +90,7 @@ Assume your audience is made up of engineers and platform practitioners who work
 
 1. **Problem and Value:** The current discovery/integration friction, the manual steps eliminated, and the estimated engineering time saved per execution. Focus on the operational value unlocked by the automation rather than deep financial ROI math. State your assumptions clearly.
 
-2. **Solution Demo:** Demo the workflow live for your onboarded service using the working implementation you already built. You may run or rerun it if that helps your presentation, but the expectation is a working demo -- not live debugging. Show the workspace structure, collections, spec in Spec Hub, environments, and monitors.
+2. **Solution Demo:** Demo the workflow live for your onboarded service using the working implementation you already built. You may run or rerun it if that helps your presentation, but the expectation is a working demo -- not live debugging. Show the workspace structure, collections, spec in Spec Hub, environments, and monitors. Make clear what the generated assets prove immediately and where customer-specific logic or deeper validation would still need to be added.
 
 3. **Adaptation and Scaling:** This is the consulting piece. The customer's environment isn't uniform. Explain:
    - What in the onboarding workflow stays the same across services and what changes in the inputs, environment configuration, and platform-team coordination required for a service with different infrastructure or CI/CD
@@ -98,13 +99,13 @@ Assume your audience is made up of engineers and platform practitioners who work
 
 4. **Handoff and Ownership:** What artifacts do you leave behind? What does the platform team need to maintain this independently? What would require ongoing CSE support vs what's self-serve after Day 90? What would a working session with their team look like?
 
-**Discussion (15 min).** We'll ask scenario-based questions that test your operational awareness and consulting instinct. These may cover topics like what happens on Day 2 when the happy-path demo is over, how you handle requests that push beyond the engagement scope, or how you would reason about a workflow that's silently degrading based on what you already built and learned. Come prepared to think on your feet.
+**Discussion (15 min).** We'll ask scenario-based questions that test your operational awareness and consulting instinct. These may cover topics like what happens after the happy-path demo is over, how you handle requests that push beyond the engagement scope, or how you diagnose automation that behaves differently as real-world conditions change. Come prepared to think on your feet.
 
 ## Evaluation Criteria
 
 Your submission is evaluated across four areas. Each area carries equal importance. The build is the entry ticket. The signal comes from how you explain, adapt, and respond to questions.
 
-**Infrastructure Consulting** -- Can you diagnose a customer environment with mixed infrastructure, adapt tooling to different stacks, and clearly articulate what changes per service vs what's universal? Can you scope a realistic working session and identify what the customer needs to provide? Do you understand what happens on Day 2 -- what breaks when tokens expire, when workflows are rerun, when specs drift from implementation? Can you reason about operational failure modes (silent degradation, environment duplication, auth expiry) without being prompted?
+**Infrastructure Consulting** -- Can you diagnose a customer environment with mixed infrastructure, adapt tooling to different stacks, and clearly articulate what changes per service vs what's universal? Can you scope a realistic working session and identify what the customer needs to provide? Do you understand how the workflow behaves once it leaves the initial happy path and enters real operational use? Can you reason about operational failure modes without needing the exact scenario spelled out for you?
 
 **Value Articulation** -- Can you make the value concrete for an engineering and platform audience? Generic statements like "things are faster" or "improves consistency" don't land. The strongest candidates connect their automation to specific operational pain from the customer scenario -- the kind of pain that costs real engineering hours, causes real incidents (what even is an "incident"? Hint: they're rarely production issues in a large enterprise), or blocks real work. Lightweight assumptions and simple ROI framing can help, but operational value matters more than polished business math.
 
@@ -122,7 +123,7 @@ Your submission is evaluated across four areas. Each area carries equal importan
 
 **Pre-Built GitHub Actions:**
 
-These are production actions maintained by the CSE team. You may call them directly or adapt the optional starter asset in this repo.
+These are CSE-managed, public-facing actions. You may call them directly or adapt the optional starter asset in this repo.
 
 - [postman-api-onboarding-action](https://github.com/postman-cs/postman-api-onboarding-action) -- End-to-end orchestrator that chains bootstrap + repo-sync
 - [postman-bootstrap-action](https://github.com/postman-cs/postman-bootstrap-action) -- Creates workspace, uploads spec to Spec Hub, generates collections (baseline, smoke, contract), configures environments
@@ -137,10 +138,16 @@ These are production actions maintained by the CSE team. You may call them direc
   2. Run `postman login` and complete the browser-based authentication.
   3. Extract the token: `cat ~/.postman/postmanrc | jq -r '.login._profiles[].accessToken'`
   4. Set it as a GitHub secret called `POSTMAN_ACCESS_TOKEN` on your repos.
-  > **Note:** This token is session-scoped and will expire. Without it, the actions still run but governance assignment, workspace linking, and system environment associations are silently skipped.
+  > **Note:** This token is session-scoped and will expire. If it is missing or stale, some features that depend on authenticated workspace context may not behave as expected even when the workflow itself appears healthy. Validate the resulting artifacts, not just the job status.
 - The actions' `spec-url` input expects a URL the runner can fetch at build time. Since you're checking the OpenAPI spec files into your repo, use the raw GitHub URL (e.g., `https://raw.githubusercontent.com/<you>/<repo>/main/specs/payment-refund-api-openapi.yaml`).
 - The actions persist state across runs using GitHub repository variables and may commit generated workflow files. The default `GITHUB_TOKEN` may not have sufficient permissions for these operations — review the action READMEs for guidance on authentication inputs.
-- The repo includes optional starter material under `starter-assets/`. You may adapt it or ignore it, but be prepared to explain what you kept, what you changed, and why.
+- Before you spend time debugging workflow logic, do a short preflight:
+  1. Confirm your Postman Enterprise trial is active
+  2. Confirm `POSTMAN_API_KEY` and `POSTMAN_ACCESS_TOKEN` are both configured
+  3. Confirm your chosen `spec-url` is a fetchable raw HTTPS URL
+  4. Confirm your repo/workflow token permissions are sufficient for generated writes and assets
+  If you hit an auth, permission, or account limitation, document it clearly and explain how you validated the strongest path available to you.
+- The repo includes convenience scaffolding under `starter-assets/`. Treat it as a starting point, not a canonical implementation. If you use it, validate its inputs and behavior against the upstream action documentation before relying on it. You may keep it, modify it, or bypass it entirely, but be prepared to explain why you chose that path.
 - You do NOT need an AWS account. The specs represent the customer's APIs but you're working against the Postman API, not deploying cloud infrastructure.
 - Organize your repo or repos however you think best supports repeatable onboarding. Be prepared to justify the topology you chose.
 
@@ -168,7 +175,8 @@ These are production actions maintained by the CSE team. You may call them direc
 - A real end-to-end run against a real Postman workspace, not a theoretical design
 - The pattern proven on 1 service and evaluated on a second service with meaningfully different characteristics, showing your approach transfers via documented analysis
 - Clear explanation of how the actions chain together and why you structured the workflow the way you did
-- Clear explanation of why you used, fixed, or bypassed the starter material
+- Clear explanation of what the generated test assets establish immediately, where they stop, and how you would extend them for service-specific confidence
+- Clear explanation of why you used, modified, or bypassed the starter material
 - Honest documentation of issues encountered and how you resolved them
 
 **Clarifications:**
@@ -180,7 +188,7 @@ These are production actions maintained by the CSE team. You may call them direc
 
 **Time Guidance:**
 
-- Phase 1 (review specs, build workflow, onboard first spec): ~30-45 minutes with AI assistance -- the starter material may not work as-is. Debugging is part of the build portion of the exercise. Take time to understand what you're onboarding before automating it, and what you're debugging before fixing it. If you're spending more than an hour here, step back and reassess your approach.
+- Phase 1 (review specs, build workflow, onboard first spec): ~30-45 minutes with AI assistance. If you use the starter material, validate it before relying on it. Debugging is part of the build portion of the exercise. Take time to understand what you're onboarding before automating it, and what you're debugging before fixing it. If you're spending more than an hour here, step back and reassess your approach.
 - Phase 2 (adaptation analysis + presentation + scenario prep): ~1.5 hours -- this is where the real evaluation weight lives. Invest here. Your ability to explain what you built, why it works, what breaks, and how you'd adapt it matters more than the build itself.
 - Practice/refinement: ~0.5 hours
 
@@ -193,6 +201,7 @@ We want to see that you can take existing tooling, make it work in a realistic s
 - The workflow runs end-to-end against a real workspace for 1 service, and your adaptation analysis proves the pattern transfers to a second service with meaningfully different characteristics
 - You can explain how you built the workflow, what decisions you made, and what you ran into
 - You clearly articulate what's universal in the onboarding pattern vs what changes per service
+- You can explain why the generated test assets are a useful operational baseline, what they validate automatically, and where they stop short of full service-specific coverage
 - Your scaling plan distinguishes between what becomes repeatable per service and what still depends on customer/platform coordination
 - You clearly communicate the practical value of the pattern to an engineering/platform audience, with lightweight assumptions where helpful, and explain why it matters beyond a one-time demo
 - Your handoff plan addresses the platform/ops team specifically -- what do they need to maintain this without CSE involvement?
