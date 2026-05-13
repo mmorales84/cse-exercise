@@ -13,6 +13,10 @@ inputs:
   domain:
     description: Optional business domain label.
     required: false
+  environments-json:
+    description: JSON array of environment slugs to create (e.g. '["prod","staging"]').
+    required: false
+    default: '["prod"]'
   requester-email:
     description: Optional requester email for audit context.
     required: false
@@ -35,6 +39,7 @@ runs:
         spec-url: ${{ inputs.spec-url }}
         spec-path: ${{ inputs.spec-path }}
         domain: ${{ inputs.domain }}
+        environments-json: ${{ inputs.environments-json }}
         requester-email: ${{ inputs.requester-email }}
         postman-api-key: ${{ inputs.postman-api-key }}
         postman-access-token: ${{ inputs.postman-access-token }}
