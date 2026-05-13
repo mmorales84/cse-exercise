@@ -32,7 +32,7 @@ runs:
       uses: postman-cs/postman-api-onboarding-action@v0
       with:
         project-name: ${{ inputs.project-name }}
-        spec-url: ${{ inputs.spec-path }}
+        spec-url: ${{ inputs.spec-url }}
         spec-path: ${{ inputs.spec-path }}
         domain: ${{ inputs.domain }}
         requester-email: ${{ inputs.requester-email }}
