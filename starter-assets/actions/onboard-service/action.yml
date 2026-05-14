@@ -40,6 +40,7 @@ runs:
         spec-path: ${{ inputs.spec-path }}
         domain: ${{ inputs.domain }}
         environments-json: ${{ inputs.environments-json }}
+        generate-ci-workflow: 'false'
         requester-email: ${{ inputs.requester-email }}
         postman-api-key: ${{ inputs.postman-api-key }}
         postman-access-token: ${{ inputs.postman-access-token }}
